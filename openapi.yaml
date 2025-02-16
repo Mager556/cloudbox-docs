@@ -1,0 +1,171 @@
+openapi: 3.0.0
+info:
+  title: Cloud-Box API Specification(ru)
+  description: Документация для веб-сервиса Cloud-Box
+  version: 0.0.1
+servers:
+  - url: localhost:8080
+    description: Dev server
+paths:
+  /file:
+    post:
+      summary: Загрузить файл на сервер по ссылке
+      tags:
+        - File
+      description: Скачивает файл по переданной ссылке и сохраняет его на сервер
+      responses:
+        "400":
+          description: Неправильный запрос или ссылка не подходит
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                default:
+                  summary: Default
+                error:
+                  summary: Invalid request
+                  value:
+                    status: ERROR
+                    error: invalid request
+        "500":
+          description: Ошибка сервера при сохранении файла
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                default:
+                  summary: Default
+                error:
+                  summary: Internal error
+                  value:
+                    status: ERROR
+                    error: internal error
+        "200":
+          description: Файл успешно сохранен
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UploadResponse"
+              examples:
+                default:
+                  summary: Default
+                ok: 
+                  summary: Successfull
+                  value:
+                    hashed_name: AbcDefg123
+            
+  /file/{hashed_name}:
+    delete:
+      summary: Удалить файл по хэшу
+      tags:
+        - File
+      description: Удаляет файл с сервера по его хэшу, если такой есть
+      responses:
+        "400":
+          description: Такого файла нет
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                default:
+                  summary: Default
+                error:
+                  summary: File not exist
+                  value:
+                    status: ERROR
+                    error: File not exist
+        "500":
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                default:
+                  summary: Default
+                error:
+                  summary: Internal error
+                  value:
+                    status: ERROR
+                    error: internal error
+        "200":
+          description: Файл успешно удален
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                default:
+                  summary: Default
+                ok: 
+                  summary: Successfull
+                  value:
+                    status: OK
+                    error: ""
+    get:
+      summary: Получить файл по хэшу
+      tags:
+        - File
+      description: Возвращает ответ от сервера с файлом, если такой найден по данному хэшу
+      responses:
+        "200":
+          description: Файл успешно отдан
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Response"
+              examples:
+                default:
+                  summary: Default
+                ok: 
+                  summary: Successfull
+                  value:
+                    status: OK
+                    error: ""
+          headers:
+            Content-Disposition:
+              description: attachment; filename={filename}
+              schema:
+                type: string
+        "404":
+          description: Файл не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Response'
+              examples:
+                default:
+                  summary: Default
+                error:
+                  summary: Not Found
+                  value:
+                    status: ERROR
+                    error: File not exist
+    
+    parameters:
+      - name: hashed_name
+        in: path
+        description: Имя файла на сервере
+        required: true
+        schema:
+          type: string
+          
+          
+components:
+  schemas:
+    UploadResponse:
+      type: object
+      properties:
+        hashed_name:
+          type: string
+    Response:
+      type: object
+      properties:
+        status:
+          type: string
+        error:
+          type: string
+        
